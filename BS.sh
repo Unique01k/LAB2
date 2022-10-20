@@ -1,0 +1,38 @@
+#!/bin/bash
+while getopts i:o: flag
+do
+  case "${flag}" in
+    i) inputDir=${OPTARG};;
+    o) outputDir=${OPTARG};;
+  esac
+done
+
+if [ -z "$inputDir" ]  [ -z "$outputDir" ]
+then
+  echo "Either input or output directory wasn't set. Use -i and -o to set the input and output directories."
+  exit 1
+fi
+
+outputFilename="$outputDir/$(basename "$inputDir")-$(date +"%Y-%m-%d_%H:%M:%S").zip"
+
+echo "Backing up $inputDir to $outputFilename"
+
+if [ ! -d "$inputDir" ]  [ ! -d "$outputDir" ]
+then
+  echo "Either input or output directory doesn't exist."
+  exit 1
+fi
+
+if [[ "$inputDir" == *".."* ]]
+then
+  echo "Please don't use '..' in input directory path."
+  exit 1
+fi
+
+if ! command -v zip &> /dev/null
+then
+  echo "zip not found, installing zip..."
+  sudo apt install zip unzip
+fi
+
+zip -r "$outputFilename" "$inputDir"
